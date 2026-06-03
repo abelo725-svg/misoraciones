@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Oraciones - Generador de Tarjetas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-dia: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
+            --bg-noche: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+            --bg-naturaleza: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* DISEÑO DE LA TARJETA */
+        #prayerCard {
+            width: 100%;
+            aspect-ratio: 4/5;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            position: relative;
+            background: var(--bg-dia);
+            transition: all 0.5s ease;
+        }
+
+        #prayerText {
+            font-size: 1.5rem;
+            color: #333;
+            font-weight: 600;
+            line-height: 1.4;
+            text-align: center;
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .noche #prayerText { color: white; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); }
+        .naturaleza #prayerText { color: #1b4332; }
+
+        /* CONTROLES */
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .btn {
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:active { transform: scale(0.95); }
+
+        #micBtn { background-color: #ff4b5c; color: white; font-size: 1.1rem; }
+        #micBtn.listening { animation: pulse 1.5s infinite; background-color: #ff0000; }
+
+        #downloadBtn { background-color: #25d366; color: white; }
+
+        .theme-selector {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 3px solid white;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 75, 92, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 75, 92, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 75, 92, 0); }
+        }
+
+        .instruction { color: #64748b; font-size: 0.9rem; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="color: #334155;">✨ Mis Oraciones</h2>
+    
+    <div id="prayerCard">
+        <p id="prayerText">"Pulsa el micrófono y di tu oración..."</p>
+    </div>
+
+    <div class="controls">
+        <button id="micBtn" class="btn">
+            <span id="micIcon">🎤</span> Hablar ahora
+        </button>
+        
+        <div class="theme-selector">
+            <div class="dot" style="background: var(--bg-dia);" onclick="setTheme('dia')"></div>
+            <div class="dot" style="background: var(--bg-noche);" onclick="setTheme('noche')"></div>
+            <div class="dot" style="background: var(--bg-naturaleza);" onclick="setTheme('naturaleza')"></div>
+        </div>
+
+        <p class="instruction" id="statusInfo">Elige un color y dile algo a Dios o a tu familia.</p>
+
+        <button id="downloadBtn" class="btn" style="margin-top: 15px;">
+            📸 Guardar para WhatsApp
+        </button>
+    </div>
+</div>
+
+<script>
+    const micBtn = document.getElementById('micBtn');
+    const prayerText = document.getElementById('prayerText');
+    const prayerCard = document.getElementById('prayerCard');
+    const statusInfo = document.getElementById('statusInfo');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    // CONFIGURACIÓN DE VOZ
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'es-ES';
+        recognition.interimResults = false;
+
+        micBtn.onclick = () => {
+            recognition.start();
+            micBtn.classList.add('listening');
+            micBtn.innerHTML = "<span>👂</span> Escuchando...";
+        };
+
+        recognition.onresult = (event) => {
+            const text = event.results[0][0].transcript;
+            prayerText.innerText = `"${text}"`;
+            micBtn.classList.remove('listening');
+            micBtn.innerHTML = "<span>🎤</span> Hablar ahora";
+            statusInfo.innerText = "¡Qué oración más bonita! Ya puedes guardarla.";
+        };
+
+        recognition.onspeechend = () => {
+            recognition.stop();
+            micBtn.classList.remove('listening');
+            micBtn.innerHTML = "<span>🎤</span> Hablar ahora";
+        };
+    } else {
+        micBtn.style.display = 'none';
+        statusInfo.innerText = "Tu navegador no soporta dictado por voz, pero puedes escribir tu oración.";
+        // Permitir editar el texto si no hay micro
+        prayerText.contentEditable = true;
+    }
+
+    // CAMBIAR TEMAS
+    function setTheme(theme) {
+        prayerCard.className = theme;
+        if(theme === 'dia') prayerCard.style.background = 'var(--bg-dia)';
+        if(theme === 'noche') prayerCard.style.background = 'var(--bg-noche)';
+        if(theme === 'naturaleza') prayerCard.style.background = 'var(--bg-naturaleza)';
+    }
+
+    // CONVERTIR TARJETA EN IMAGEN
+    downloadBtn.onclick = () => {
+        html2canvas(prayerCard, {
+            borderRadius: 20,
+            scale: 2 // Mayor calidad
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'mi-oracion.png';
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    };
+</script>
+
+</body>
+</html>
