@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Oraciones Mágicas</title>
+    <!-- IMPORTAMOS LA TIPOGRAFÍA SEGURO PARA NIÑOS (REDONDEADA Y RECTA) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -13,7 +16,8 @@
         }
 
         body {
-            font-family: 'Comic Sans MS', 'Segoe UI', cursive, sans-serif;
+            /* CAMBIO AQUÍ: Ahora usará Fredoka en móvil y PC, eliminando la cursiva molesta */
+            font-family: 'Fredoka', 'Segoe UI', sans-serif;
             background-color: #f7f9fc;
             display: flex;
             flex-direction: column;
@@ -91,6 +95,7 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            font-family: 'Fredoka', sans-serif; /* Forzamos la fuente en botones */
         }
 
         #micBtn { background-color: #4a90e2; color: white; }
@@ -119,7 +124,7 @@
             100% { transform: scale(1); }
         }
 
-        .hint { color: #94a3b8; font-size: 0.85rem; font-style: italic; }
+        .hint { color: #94a3b8; font-size: 0.85rem; font-style: normal; } /* Quitamos italic para asegurar legibilidad */
     </style>
 </head>
 <body>
@@ -167,7 +172,7 @@
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.lang = 'es-ES';
-        recognition.continuous = true; // Para que no se corte sola
+        recognition.continuous = true; 
         recognition.interimResults = false;
 
         recognition.onresult = (event) => {
@@ -208,7 +213,6 @@
     function setTheme(theme, icon) {
         prayerCard.className = theme === 'dia' ? '' : theme;
         cardDeco.innerText = icon;
-        // Pequeño truco para el amarillo por defecto
         if(theme === 'dia') {
             prayerCard.style.background = 'var(--bg-dia)';
         } else {
@@ -217,7 +221,6 @@
     }
 
     downloadBtn.onclick = () => {
-        // Aseguramos que el botón no salga en la foto
         html2canvas(prayerCard, {
             scale: 3,
             backgroundColor: null
